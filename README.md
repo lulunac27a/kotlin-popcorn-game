@@ -1,3 +1,3 @@
 # Kotlin Popcorn Game
 
-This is a popcorn game using Kotlin language.
+This is a simple popcorn game using Kotlin language.
