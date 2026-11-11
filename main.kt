@@ -78,13 +78,13 @@ private class PopcornGame {
         val isEdgeBonus = spawnX <= 1 || spawnX >= width - 2
         val isGolden = random.nextFloat() < 0.15
         popcorns.add(
-            Popcorn(
-                x = spawnX,
-                y = 0,
-                speed = if (isGolden) 2 else 1,
-                isEdgeBonus = isEdgeBonus,
-                isGolden = isGolden
-            )
+                Popcorn(
+                        x = spawnX,
+                        y = 0,
+                        speed = if (isGolden) 2 else 1,
+                        isEdgeBonus = isEdgeBonus,
+                        isGolden = isGolden
+                )
         )
     }
 
@@ -110,13 +110,14 @@ private class PopcornGame {
     private fun isBucketCenter(x: Int, y: Int) = y == height - 1 && x == bucketX
 
     private fun isBucketSide(x: Int, y: Int) =
-        y == height - 1 && (x == bucketX - 1 || x == bucketX + 1)
+            y == height - 1 && (x == bucketX - 1 || x == bucketX + 1)
 
-    private fun kernelSymbol(kernel: Popcorn): String = when {
-        kernel.isGolden -> "$"
-        kernel.isEdgeBonus -> "@"
-        else -> "*"
-    }
+    private fun kernelSymbol(kernel: Popcorn): String =
+            when {
+                kernel.isGolden -> "$"
+                kernel.isEdgeBonus -> "@"
+                else -> "*"
+            }
 
     private fun readInput(): String {
         print("Move (a/d/w/q): ")
@@ -164,22 +165,24 @@ private class PopcornGame {
     }
 
     private fun calculatePoints(kernel: Popcorn, isBullseye: Boolean): Int {
-        val basePoints = when {
-            kernel.isGolden -> 50
-            isBullseye -> 25
-            else -> 10
-        }
+        val basePoints =
+                when {
+                    kernel.isGolden -> 50
+                    isBullseye -> 25
+                    else -> 10
+                }
         val edgeMultiplier = if (kernel.isEdgeBonus) 2 else 1
         val comboMultiplier = if (comboStreak > 1) comboStreak else 1
         return basePoints * edgeMultiplier * comboMultiplier
     }
 
     private fun buildCatchMessage(kernel: Popcorn, isBullseye: Boolean, earned: Int): String {
-        val typeLabel = when {
-            kernel.isGolden -> "GOLDEN CATCH"
-            isBullseye -> "CENTER BULLSEYE"
-            else -> "Rim Catch"
-        }
+        val typeLabel =
+                when {
+                    kernel.isGolden -> "GOLDEN CATCH"
+                    isBullseye -> "CENTER BULLSEYE"
+                    else -> "Rim Catch"
+                }
         val tags = catchTags(kernel)
         val tagText = if (tags.isEmpty()) "" else " (${tags.joinToString(", ")})"
         return "+$earned pts! $typeLabel$tagText"
@@ -204,9 +207,9 @@ private class PopcornGame {
 }
 
 data class Popcorn(
-    var x: Int,
-    var y: Int,
-    val speed: Int = 1,
-    val isEdgeBonus: Boolean = false,
-    val isGolden: Boolean = false
+        var x: Int,
+        var y: Int,
+        val speed: Int = 1,
+        val isEdgeBonus: Boolean = false,
+        val isGolden: Boolean = false
 )
