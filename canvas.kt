@@ -45,10 +45,11 @@ class PopcornGamePanel : JPanel() {
     private var spawnCounter = 0
 
     // 60 FPS Game Loop (~16ms per tick)
-    private val gameTimer = Timer(16) {
-        updateGame()
-        repaint()
-    }
+    private val gameTimer =
+            Timer(16) {
+                updateGame()
+                repaint()
+            }
 
     init {
         preferredSize = Dimension(boardWidth, boardHeight)
@@ -56,42 +57,48 @@ class PopcornGamePanel : JPanel() {
         isFocusable = true
 
         // Mouse Motion Listener: Center bucket horizontally on mouse cursor
-        addMouseMotionListener(object : MouseMotionAdapter() {
-            override fun mouseMoved(e: MouseEvent) {
-                moveBucketToMouse(e.x)
-            }
+        addMouseMotionListener(
+                object : MouseMotionAdapter() {
+                    override fun mouseMoved(e: MouseEvent) {
+                        moveBucketToMouse(e.x)
+                    }
 
-            override fun mouseDragged(e: MouseEvent) {
-                moveBucketToMouse(e.x)
-            }
-        })
+                    override fun mouseDragged(e: MouseEvent) {
+                        moveBucketToMouse(e.x)
+                    }
+                }
+        )
 
         // Mouse Click Listener: Click anywhere to restart when Game Over
-        addMouseListener(object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent) {
-                if (isGameOver) {
-                    resetGame()
+        addMouseListener(
+                object : MouseAdapter() {
+                    override fun mousePressed(e: MouseEvent) {
+                        if (isGameOver) {
+                            resetGame()
+                        }
+                    }
                 }
-            }
-        })
+        )
 
         // Keyboard Listener: Optional fallback controls & 'R' restart
-        addKeyListener(object : KeyAdapter() {
-            override fun keyPressed(e: KeyEvent) {
-                when (e.keyCode) {
-                    KeyEvent.VK_LEFT, KeyEvent.VK_A -> leftPressed = true
-                    KeyEvent.VK_RIGHT, KeyEvent.VK_D -> rightPressed = true
-                    KeyEvent.VK_R -> if (isGameOver) resetGame()
-                }
-            }
+        addKeyListener(
+                object : KeyAdapter() {
+                    override fun keyPressed(e: KeyEvent) {
+                        when (e.keyCode) {
+                            KeyEvent.VK_LEFT, KeyEvent.VK_A -> leftPressed = true
+                            KeyEvent.VK_RIGHT, KeyEvent.VK_D -> rightPressed = true
+                            KeyEvent.VK_R -> if (isGameOver) resetGame()
+                        }
+                    }
 
-            override fun keyReleased(e: KeyEvent) {
-                when (e.keyCode) {
-                    KeyEvent.VK_LEFT, KeyEvent.VK_A -> leftPressed = false
-                    KeyEvent.VK_RIGHT, KeyEvent.VK_D -> rightPressed = false
+                    override fun keyReleased(e: KeyEvent) {
+                        when (e.keyCode) {
+                            KeyEvent.VK_LEFT, KeyEvent.VK_A -> leftPressed = false
+                            KeyEvent.VK_RIGHT, KeyEvent.VK_D -> rightPressed = false
+                        }
+                    }
                 }
-            }
-        })
+        )
 
         gameTimer.start()
     }
@@ -133,14 +140,14 @@ class PopcornGamePanel : JPanel() {
             val isGolden = Random.nextFloat() < 0.18f
 
             popcorns.add(
-                Kernel(
-                    x = spawnX.toDouble(),
-                    y = -20.0,
-                    radius = radius,
-                    speedY = if (isGolden) 6.5 else 3.8,
-                    isEdgeBonus = isEdgeBonus,
-                    isGolden = isGolden
-                )
+                    Kernel(
+                            x = spawnX.toDouble(),
+                            y = -20.0,
+                            radius = radius,
+                            speedY = if (isGolden) 6.5 else 3.8,
+                            isEdgeBonus = isEdgeBonus,
+                            isGolden = isGolden
+                    )
             )
         }
 
@@ -166,11 +173,12 @@ class PopcornGamePanel : JPanel() {
                         comboStreak = 0
                     }
 
-                    val basePoints = when {
-                        k.isGolden -> 50
-                        isBullseye -> 25
-                        else -> 10
-                    }
+                    val basePoints =
+                            when {
+                                k.isGolden -> 50
+                                isBullseye -> 25
+                                else -> 10
+                            }
 
                     val edgeMult = if (k.isEdgeBonus) 2 else 1
                     val comboMult = if (comboStreak > 1) comboStreak else 1
@@ -184,11 +192,12 @@ class PopcornGamePanel : JPanel() {
                         if (comboStreak > 1) append(" [${comboStreak}x]")
                     }
 
-                    val popupColor = when {
-                        k.isGolden -> Color(255, 215, 0)
-                        isBullseye -> Color(100, 255, 140)
-                        else -> Color.WHITE
-                    }
+                    val popupColor =
+                            when {
+                                k.isGolden -> Color(255, 215, 0)
+                                isBullseye -> Color(100, 255, 140)
+                                else -> Color.WHITE
+                            }
 
                     floatingTexts.add(FloatingText(label, k.x.toInt(), bucketY - 10, popupColor))
                     iterator.remove()
@@ -200,7 +209,9 @@ class PopcornGamePanel : JPanel() {
             if (k.y - k.radius > boardHeight) {
                 missed++
                 comboStreak = 0
-                floatingTexts.add(FloatingText("MISS!", k.x.toInt(), boardHeight - 40, Color(255, 90, 90)))
+                floatingTexts.add(
+                        FloatingText("MISS!", k.x.toInt(), boardHeight - 40, Color(255, 90, 90))
+                )
                 iterator.remove()
 
                 if (missed >= maxMissed) {
@@ -240,11 +251,12 @@ class PopcornGamePanel : JPanel() {
             val drawY = (k.y - k.radius).toInt()
             val diameter = k.radius * 2
 
-            g2.color = when {
-                k.isGolden -> Color(255, 200, 0)       // Gold
-                k.isEdgeBonus -> Color(255, 165, 90)   // Warm Orange-Cream
-                else -> Color(255, 248, 220)           // Classic Popcorn Cream
-            }
+            g2.color =
+                    when {
+                        k.isGolden -> Color(255, 200, 0) // Gold
+                        k.isEdgeBonus -> Color(255, 165, 90) // Warm Orange-Cream
+                        else -> Color(255, 248, 220) // Classic Popcorn Cream
+                    }
             g2.fillOval(drawX, drawY, diameter, diameter)
 
             // Fluffy popcorn highlight bump
@@ -299,24 +311,28 @@ class PopcornGamePanel : JPanel() {
 
             g2.color = Color.LIGHT_GRAY
             g2.font = Font("SansSerif", Font.PLAIN, 18)
-            g2.drawString("Click or Press 'R' to Play Again", boardWidth / 2 - 120, boardHeight / 2 + 55)
+            g2.drawString(
+                    "Click or Press 'R' to Play Again",
+                    boardWidth / 2 - 120,
+                    boardHeight / 2 + 55
+            )
         }
     }
 }
 
 data class Kernel(
-    var x: Double,
-    var y: Double,
-    val radius: Int,
-    val speedY: Double,
-    val isEdgeBonus: Boolean,
-    val isGolden: Boolean
+        var x: Double,
+        var y: Double,
+        val radius: Int,
+        val speedY: Double,
+        val isEdgeBonus: Boolean,
+        val isGolden: Boolean
 )
 
 data class FloatingText(
-    val text: String,
-    var x: Int,
-    var y: Int,
-    val color: Color,
-    var life: Int = 45
+        val text: String,
+        var x: Int,
+        var y: Int,
+        val color: Color,
+        var life: Int = 45
 )
