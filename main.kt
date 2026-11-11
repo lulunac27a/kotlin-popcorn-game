@@ -5,28 +5,30 @@ import kotlin.math.abs
 fun main() {
     val scanner = Scanner(System.`in`)
     val random = Random()
-    
+
     val width = 20
     val height = 12
     var bucketX = width / 2
     var score = 0
     var missed = 0
     val maxMissed = 3
+    var comboStreak = 0
     var lastEventMessage = "Game Started! Catch the popcorn!"
 
-    // Active popcorns on the screen
     val popcorns = mutableListOf<Popcorn>()
 
-    println("==================================================")
-    println("        KOTLIN POPCORN GAME: SCORE EDITION        ")
-    println("==================================================")
+    println("=======================================================")
+    println("     KOTLIN POPCORN GAME: COMBO & GOLDEN EDITION       ")
+    println("=======================================================")
     println("Controls:")
     println("  'a' = Move Left | 'd' = Move Right | 'w' = Wait | 'q' = Quit")
-    println("\nPositional Scoring:")
-    println("  * Center Bucket Catch : +25 pts (Bullseye!)")
-    println("  * Rim Bucket Catch    : +10 pts")
-    println("  * Outer Edge Kernel @ : 2x Point Multiplier!")
-    println("==================================================\n")
+    println("\nKernel Types:")
+    println("  * Standard Kernel : Falls 1 row  | Base 10-25 pts")
+    println("  @ Edge Kernel     : Falls 1 row  | 2x Lane Bonus")
+    println("  $ Golden Kernel   : Falls 2 rows | Base 50 pts!")
+    println("\nCombo Rule:")
+    println("  Consecutive Center Bullseyes multiply your score!")
+    println("=======================================================\n")
     print("Press Enter to Start...")
     scanner.nextLine()
 
@@ -34,15 +36,24 @@ fun main() {
         // Clear screen / Draw header
         print("\u001b[H\u001b[2J")
         System.out.flush()
-        println("Score: $score | Missed: $missed/$maxMissed")
+        println("Score: $score | Combo: ${comboStreak}x | Missed: $missed/$maxMissed")
         println("Status: $lastEventMessage")
 
-        // 35% chance to spawn a new piece of popcorn at the top
-        if (random.nextFloat() < 0.35) {
+        // 40% chance to spawn a new piece of popcorn at the top
+        if (random.nextFloat() < 0.40) {
             val spawnX = random.nextInt(width)
-            // Kernels near the left or right walls are high-value edge kernels
             val isEdgeBonus = spawnX <= 1 || spawnX >= width - 2
-            popcorns.add(Popcorn(x = spawnX, y = 0, isEdgeBonus = isEdgeBonus))
+            val isGolden = random.nextFloat() < 0.15 // 15% chance for a fast golden kernel
+
+            popcorns.add(
+                Popcorn(
+                    x = spawnX,
+                    y = 0,
+                    speed = if (isGolden) 2 else 1,
+                    isEdgeBonus = isEdgeBonus,
+                    isGolden = isGolden
+                )
+            )
         }
 
         // Draw the game board
@@ -55,15 +66,22 @@ fun main() {
                     y == height - 1 && (x == bucketX - 1 || x == bucketX + 1) -> {
                         // Skip spaces occupied by the 3-character bucket [U]
                     }
-                    // Draw active popcorns ('@' for 2x edge kernels, '*' for normal)
-                    kernel != null -> print(if (kernel.isEdgeBonus) "@" else "*")
+                    // Draw active popcorns
+                    kernel != null -> {
+                        val symbol = when {
+                            kernel.isGolden -> "$"
+                            kernel.isEdgeBonus -> "@"
+                            else -> "*"
+                        }
+                        print(symbol)
+                    }
                     // Draw empty air
                     else -> print(" ")
                 }
             }
             println()
         }
-        
+
         // Draw the floor border with edge markers
         println("==" + "-".repeat(width - 2) + "==")
 
@@ -86,26 +104,53 @@ fun main() {
         val iterator = popcorns.iterator()
         while (iterator.hasNext()) {
             val p = iterator.next()
-            p.y++
+            p.y += p.speed
 
-            // Check if popcorn reaches bucket level
+            // Check if popcorn reaches or passes bucket level
             if (p.y >= height - 1) {
                 val distanceFromCenter = abs(p.x - bucketX)
 
                 if (distanceFromCenter <= 1) {
-                    // Base points depend on exact position inside the bucket
-                    val basePoints = if (distanceFromCenter == 0) 25 else 10
-                    val multiplier = if (p.isEdgeBonus) 2 else 1
-                    val earned = basePoints * multiplier
-                    
+                    val isBullseye = distanceFromCenter == 0
+
+                    // Update combo streak
+                    if (isBullseye) {
+                        comboStreak++
+                    } else {
+                        comboStreak = 0
+                    }
+
+                    // Calculate base points
+                    val basePoints = when {
+                        p.isGolden -> 50
+                        isBullseye -> 25
+                        else -> 10
+                    }
+
+                    // Apply edge & combo multipliers
+                    val edgeMultiplier = if (p.isEdgeBonus) 2 else 1
+                    val comboMultiplier = if (comboStreak > 1) comboStreak else 1
+                    val earned = basePoints * edgeMultiplier * comboMultiplier
+
                     score += earned
-                    
-                    val catchType = if (distanceFromCenter == 0) "CENTER BULLSEYE" else "Rim Catch"
-                    val bonusTag = if (p.isEdgeBonus) " (2x Edge Bonus!)" else ""
-                    lastEventMessage = "+$earned pts! $catchType$bonusTag"
+
+                    // Build feedback message
+                    val typeLabel = when {
+                        p.isGolden -> "GOLDEN CATCH"
+                        isBullseye -> "CENTER BULLSEYE"
+                        else -> "Rim Catch"
+                    }
+                    val tags = mutableListOf<String>()
+                    if (p.isEdgeBonus) tags.add("2x Edge")
+                    if (comboStreak > 1) tags.add("${comboStreak}x Combo")
+                    val tagText = if (tags.isNotEmpty()) " (${tags.joinToString(", ")})" else ""
+
+                    lastEventMessage = "+$earned pts! $typeLabel$tagText"
                 } else {
                     missed++
-                    lastEventMessage = "Missed a kernel at column ${p.x}!"
+                    comboStreak = 0
+                    val kernelName = if (p.isGolden) "Golden kernel" else "kernel"
+                    lastEventMessage = "Missed a $kernelName at column ${p.x}! Combo reset."
                 }
                 iterator.remove()
             }
@@ -119,5 +164,7 @@ fun main() {
 data class Popcorn(
     var x: Int,
     var y: Int,
-    val isEdgeBonus: Boolean = false
+    val speed: Int = 1,
+    val isEdgeBonus: Boolean = false,
+    val isGolden: Boolean = false
 )
