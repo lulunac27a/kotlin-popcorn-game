@@ -46,13 +46,13 @@ fun main() {
             val isGolden = random.nextFloat() < 0.15 // 15% chance for a fast golden kernel
 
             popcorns.add(
-                Popcorn(
-                    x = spawnX,
-                    y = 0,
-                    speed = if (isGolden) 2 else 1,
-                    isEdgeBonus = isEdgeBonus,
-                    isGolden = isGolden
-                )
+                    Popcorn(
+                            x = spawnX,
+                            y = 0,
+                            speed = if (isGolden) 2 else 1,
+                            isEdgeBonus = isEdgeBonus,
+                            isGolden = isGolden
+                    )
             )
         }
 
@@ -68,11 +68,12 @@ fun main() {
                     }
                     // Draw active popcorns
                     kernel != null -> {
-                        val symbol = when {
-                            kernel.isGolden -> "$"
-                            kernel.isEdgeBonus -> "@"
-                            else -> "*"
-                        }
+                        val symbol =
+                                when {
+                                    kernel.isGolden -> "$"
+                                    kernel.isEdgeBonus -> "@"
+                                    else -> "*"
+                                }
                         print(symbol)
                     }
                     // Draw empty air
@@ -121,11 +122,12 @@ fun main() {
                     }
 
                     // Calculate base points
-                    val basePoints = when {
-                        p.isGolden -> 50
-                        isBullseye -> 25
-                        else -> 10
-                    }
+                    val basePoints =
+                            when {
+                                p.isGolden -> 50
+                                isBullseye -> 25
+                                else -> 10
+                            }
 
                     // Apply edge & combo multipliers
                     val edgeMultiplier = if (p.isEdgeBonus) 2 else 1
@@ -135,11 +137,12 @@ fun main() {
                     score += earned
 
                     // Build feedback message
-                    val typeLabel = when {
-                        p.isGolden -> "GOLDEN CATCH"
-                        isBullseye -> "CENTER BULLSEYE"
-                        else -> "Rim Catch"
-                    }
+                    val typeLabel =
+                            when {
+                                p.isGolden -> "GOLDEN CATCH"
+                                isBullseye -> "CENTER BULLSEYE"
+                                else -> "Rim Catch"
+                            }
                     val tags = mutableListOf<String>()
                     if (p.isEdgeBonus) tags.add("2x Edge")
                     if (comboStreak > 1) tags.add("${comboStreak}x Combo")
@@ -162,9 +165,9 @@ fun main() {
 }
 
 data class Popcorn(
-    var x: Int,
-    var y: Int,
-    val speed: Int = 1,
-    val isEdgeBonus: Boolean = false,
-    val isGolden: Boolean = false
+        var x: Int,
+        var y: Int,
+        val speed: Int = 1,
+        val isEdgeBonus: Boolean = false,
+        val isGolden: Boolean = false
 )
